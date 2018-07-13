@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Survey Form</title>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            // this triggers the connection event in our server!
+            var socket = io.connect("http://localhost:8000");
+            // we'll write all the socket stuff after the above line!
+
+            $('button').click(function(event) {
+                event.preventDefault();
+                var message = document.createElement("div");
+                message.setAttribute("class", "message");
+                $('.message').css("background-color", "#B6D7A8");
+                $('.message').css("padding", "10px");
+                $('.message').css("width", "300px");
+                $('.message').css("margin", "0 auto");
+                $('.message').css("margin-bottom", "10px");
+                $('.message').css("border", "2px solid");
+                var formData = {
+                    name: $('#name').val(),
+                    location: $('#location').val(),
+                    language: $('#language').val(),
+                    comment: $('#comment').val()
+                };
+                var randomNumber = Math.floor(Math.random() * 1001);
+                socket.emit("random_number", randomNumber);
+                socket.emit("posting_form", formData);
+            });
+            //displays random number
+            socket.on('random_number', function(number) {
+                console.log(number);
+                var randomNum = document.createElement("p");
+                randomNum.innerHTML = `Your lucky number emitted by the server is ${number}`;
+                $(".message").prepend(randomNum);
+            });
+            //displays form data
+            socket.on('updated_message', function(data) {
+                console.log(data);
+                var message = document.createElement("p");
+                message.innerHTML = `You emitted the following information to the server: { 
+                    name: ${data.name}, 
+                    location: ${data.location}, 
+                    language: ${data.language}, 
+                    comment: ${data.comment}
+                }`;
+                $(".message").prepend(message);
+            });
+        })
+    </script>
+</head>
+
+<body>
+    $( 'button').click(function (){ socket.emit( "button_clicked", {reason: "because I want to learn about sockets!"}); }); socket.on( 'server_response', function (data){ console.log( 'The server says: ' + data.response); });
+
+    <form action="/users" method='POST'>
+        <p>Your Name: <input name="name" type="text"></p>
+        <p>Dojo Location:
+            <select name="location" id="">
+                <option value="">Mountain View</option>
+                <option value="">Washington</option>
+                <option value="">Seattle</option>
+                <option value="">San Jose</option>
+            </select>
+
+        </p>
+        <p>Favorite Language:
+            <select name="language" id=""> 
+                <option value="">Ruby</option>
+                <option value="">Javascript</option>
+                <option value="">iOS</option>
+                <option value="">Python</option>
+           </select>
+
+        </p>
+        <p>Comment(optional)</p>
+        <textarea name="comment" id="" cols="30" rows="4"></textarea>
+        <input type="submit" value="Submit">
+
+
+    </form>
+</body>
+
+</html>
